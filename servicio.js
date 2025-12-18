@@ -6,15 +6,25 @@ const PORT = process.env.PORT ? Number(process.env.PORT) : 8000;
 
 app.use(express.json());
 
-// CORS configurado para desarrollo y producción
+// CORS configurado para permitir CUALQUIER subdominio de Vercel
 app.use(cors({
-    origin: [
-        'http://localhost:4200',  // Desarrollo local
-        'http://localhost:8000',  // Desarrollo local backend
-        'https://fron-tienda-dun.vercel.app',  // Producción Vercel
-        'https://fron-tienda-git-main-anthonygonzalezveras-projects.vercel.app',
-        'https://fron-tienda-e0tijj0ri-anthonygonzalezveras-projects.vercel.app'
-    ],
+    origin: function(origin, callback) {
+        // Permitir requests sin origin (Postman, curl, etc)
+        if (!origin) return callback(null, true);
+        
+        // Permitir localhost para desarrollo
+        if (origin.includes('localhost')) {
+            return callback(null, true);
+        }
+        
+        // Permitir CUALQUIER subdominio de vercel.app
+        if (origin.endsWith('.vercel.app')) {
+            return callback(null, true);
+        }
+        
+        // Rechazar otros orígenes
+        callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 }));
